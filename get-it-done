@@ -1,6 +1,6 @@
 #!/bin/sh
 
-EXT=".php"
+EXT=".py"
 DIRNAME=$(dirname $0)
 
 if [ `whoami` != "root" ]
@@ -11,4 +11,4 @@ then
     exit $?
 fi
 
-$DIRNAME/get-shit-done$EXT $*
+$DIRNAME/get-it-done$EXT $*

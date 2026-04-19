@@ -11,13 +11,13 @@ if ( 'root' != strtolower($whoami) ) {
 }
 
 $homedir = trim(`cd ~ && pwd`);
-$iniLocal = $homedir.'/.config/get-shit-done.ini';
+$iniLocal = $homedir.'/.config/get-it-done.ini';
 $iniGlobal = __DIR__ . '/sites.ini';
 
 $uname = trim(`uname`);
 
 if ( $uname == 'Linux' ) {
-    $restartNetworkingCommand = '/etc/init.d/networking restart';
+    $restartNetworkingCommand = 'resolvectl flush-caches';
 } elseif ( $uname == 'Darwin' ) {
     $restartNetworkingCommand = 'dscacheutil -flushcache';
 } else {
