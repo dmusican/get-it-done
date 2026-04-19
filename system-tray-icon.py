@@ -7,6 +7,8 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import AyatanaAppIndicator3 as AppIndicator3
 from gi.repository import Gtk, GLib
 import threading
+import dbus
+from dbus.mainloop.glib import DBusGMainLoop
 
 HOSTS_FILE = '/etc/hosts'
 START_TOKEN = '## start-gsd'
@@ -23,7 +25,12 @@ def update(indicator):
     indicator.set_label('🔴 Blocked' if is_work_mode() else '🟢 Unblocked', '')
     GLib.timeout_add_seconds(CHECK_INTERVAL, update, indicator)
 
+def on_resume(indicator):
+    # Re-apply label and restart polling after wake
+    GLib.timeout_add_seconds(2, update, indicator)
+
 def main():
+    DBusGMainLoop(set_as_default=True)
     indicator = AppIndicator3.Indicator.new(
         'get-it-done-indicator',
         'dialog-information',
@@ -37,6 +44,15 @@ def main():
     menu.append(quit_item)
     menu.show_all()
     indicator.set_menu(menu)
+
+    # Listen for system resume
+    bus = dbus.SystemBus()
+    bus.add_signal_receiver(
+        lambda *args: on_resume(indicator),
+        signal_name='PrepareForSleep',
+        dbus_interface='org.freedesktop.login1.Manager',
+        path='/org/freedesktop/login1'
+    )
 
     GLib.timeout_add_seconds(1, update, indicator)  # small delay for startup
     Gtk.main()
