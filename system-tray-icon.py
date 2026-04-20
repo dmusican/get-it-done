@@ -22,12 +22,15 @@ def is_work_mode():
         return False
 
 def update(indicator):
+    mode = is_work_mode()
+    label = '🔴 Blocked' if mode else '🟢 Unblocked'
+    print(f"update called: mode={mode}, label={label}", flush=True)
     indicator.set_label('🔴 Blocked' if is_work_mode() else '🟢 Unblocked', '')
     GLib.timeout_add_seconds(CHECK_INTERVAL, update, indicator)
 
-def on_resume(indicator):
-    # Re-apply label and restart polling after wake
-    GLib.timeout_add_seconds(2, update, indicator)
+# def on_resume(indicator):
+#     # Re-apply label and restart polling after wake
+#     GLib.timeout_add_seconds(10, update, indicator)
 
 def main():
     DBusGMainLoop(set_as_default=True)
@@ -48,13 +51,14 @@ def main():
     # Listen for system resume
     bus = dbus.SystemBus()
     bus.add_signal_receiver(
-        lambda *args: on_resume(indicator),
+        # lambda *args: on_resume(indicator),
+        lambda *args: GLib.timeout_add_seconds(2, update, indicator),
         signal_name='PrepareForSleep',
         dbus_interface='org.freedesktop.login1.Manager',
         path='/org/freedesktop/login1'
     )
 
-    GLib.timeout_add_seconds(1, update, indicator)  # small delay for startup
+    GLib.timeout_add_seconds(2, update, indicator)  # small delay for startup
     Gtk.main()
 
 if __name__ == '__main__':
