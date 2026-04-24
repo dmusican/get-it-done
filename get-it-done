@@ -1,6 +1,6 @@
 #!/bin/sh
 
-EXT=".py"
+EXT=".php"
 DIRNAME=$(dirname $0)
 
 if [ `whoami` != "root" ]
